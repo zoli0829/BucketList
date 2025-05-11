@@ -17,6 +17,8 @@ struct ContentView: View {
     )
     
     @State private var viewModel = ViewModel()
+    
+    @State private var showingHybridMap = false
         
     var body: some View {
         if viewModel.isUnlocked {
@@ -30,11 +32,25 @@ struct ContentView: View {
                                 .frame(width: 44, height: 44)
                                 .background(.white)
                                 .clipShape(.circle)
-                                .onLongPressGesture {
-                                    viewModel.selectedPlace = location
+                                .contextMenu {
+                                    Button("Edit Place") {
+                                        viewModel.selectedPlace = location
+                                    }
                                 }
                         }
                     }
+                }
+                .mapStyle(showingHybridMap ? .hybrid : .standard)
+                .overlay(alignment: .topTrailing) {
+                    Button {
+                        showingHybridMap.toggle()
+                    } label: {
+                        Image(systemName: "map")
+                            .padding()
+                            .background(.thinMaterial)
+                            .clipShape(.circle)
+                    }
+                    .padding()
                 }
                     .onTapGesture { position in
                         if let coordinate = proxy.convert(position, from: .local) {
@@ -45,6 +61,11 @@ struct ContentView: View {
                         EditView(location: place) {
                             viewModel.updateLocation(location: $0)
                         }
+                    }
+                    .alert("Authentication failed", isPresented: $viewModel.showAuthError) {
+                        Button("OK", role: .cancel) {}
+                    } message: {
+                        Text("Failed to authenticate. Please try again later.")
                     }
             }
         } else {

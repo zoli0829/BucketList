@@ -16,6 +16,7 @@ extension ContentView {
         private(set) var locations: [Location]
         var selectedPlace: Location?
         var isUnlocked = false
+        var showAuthError = false
         
         let savePath = URL.documentsDirectory.appending(path: "SavedPlaces")
         
@@ -62,8 +63,11 @@ extension ContentView {
                 context.evaluatePolicy(.deviceOwnerAuthenticationWithBiometrics, localizedReason: reason) { success, authenticationError in
                     if success {
                         self.isUnlocked = true
+                        // just to reset it because when I first fail to auth, but then auth, it still shows the error message
+                        self.showAuthError = false
                     } else {
-                        // error
+                        // show error
+                        self.showAuthError = true
                     }
                 }
             } else {
